@@ -1,4 +1,5 @@
-#include <tulip/TulipPlugin.h>
+#include <tulip/ImportModule.h>
+#include <tulip/TulipPluginHeaders.h>
 #include <stdexcept>
 
 #define CHECK_PROP_PROVIDED(PROP, STOR) \
@@ -15,7 +16,7 @@ namespace {
 		HTML_HELP_OPEN() \
 			HTML_HELP_DEF( "type", "LayoutProperty" ) \
 			HTML_HELP_BODY() \
-			"The layout to use." \
+			"The layout to add noise to." \
 			HTML_HELP_CLOSE(),
 
 		HTML_HELP_OPEN() \
@@ -32,13 +33,15 @@ namespace {
 	};
 }
 
-class NoiseToLayout:public tlp::Algorithm {
+class NoiseToLayout:public tlp::LayoutAlgorithm {
 private:
 	tlp::LayoutProperty *layout;
 	double mean, stddev;
 
 public:
-	NoiseToLayout(const tlp::AlgorithmContext &context):Algorithm(context) {
+	PLUGININFORMATIONS("Add noise to layout", "Cyrille FAUCHEUX", "2012-01-17", "Add gaussian noise to a layout.", "1.0", "Basic");
+
+	NoiseToLayout(const tlp::PluginContext *context):LayoutAlgorithm(context) {
 		addInParameter< LayoutProperty > ("layout", paramHelp[0], "viewLayout");
 		addInParameter< double >         ("mean",   paramHelp[1], "0"         );
 		addInParameter< double >         ("stddev", paramHelp[2], "1"         );
@@ -76,7 +79,7 @@ public:
 			node_layout[1] = node_layout[1] + gaussrand(this->mean, this->stddev);
 			node_layout[2] = node_layout[2] + gaussrand(this->mean, this->stddev);
 
-			this->layout->setNodeValue(n, node_layout);
+			this->result->setNodeValue(n, node_layout);
 		}
 		delete itNodes;
 
@@ -111,4 +114,4 @@ public:
 	~NoiseToLayout() {}
 };
 
-ALGORITHMPLUGIN(NoiseToLayout, "Add noise to layout", "Cyrille FAUCHEUX", "2012-01-17", "", "1.0");
+PLUGIN(NoiseToLayout)
