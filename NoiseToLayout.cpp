@@ -33,15 +33,15 @@ namespace {
 	};
 }
 
-class NoiseToLayout:public tlp::LayoutAlgorithm {
+class NoiseToLayout:public tlp::Algorithm {
 private:
 	tlp::LayoutProperty *layout;
 	double mean, stddev;
 
 public:
-	PLUGININFORMATIONS("Add noise to layout", "Cyrille FAUCHEUX", "2012-01-17", "Add gaussian noise to a layout.", "1.0", "Basic");
+	PLUGININFORMATIONS("Add noise to layout", "Cyrille FAUCHEUX", "2012-01-17", "Add gaussian noise to a layout.", "1.0", "Layout");
 
-	NoiseToLayout(const tlp::PluginContext *context):LayoutAlgorithm(context) {
+	NoiseToLayout(const tlp::PluginContext *context):Algorithm(context) {
 		addInParameter< LayoutProperty > ("layout", paramHelp[0], "viewLayout");
 		addInParameter< double >         ("mean",   paramHelp[1], "0"         );
 		addInParameter< double >         ("stddev", paramHelp[2], "1"         );
@@ -71,15 +71,31 @@ public:
 		node n;
 		Coord node_layout;
 
+		std::cout << "Mean is " << this->mean << std::endl;
+		std::cout << "Stdev is " << this->stddev << std::endl;
+
 		while(itNodes->hasNext()) {
 			n = itNodes->next();
 			node_layout = this->layout->getNodeValue(n);
 
-			node_layout[0] = node_layout[0] + gaussrand(this->mean, this->stddev);
-			node_layout[1] = node_layout[1] + gaussrand(this->mean, this->stddev);
-			node_layout[2] = node_layout[2] + gaussrand(this->mean, this->stddev);
+			double d0 = gaussrand(this->mean, this->stddev);
+			double d1 = gaussrand(this->mean, this->stddev);
+			double d2 = gaussrand(this->mean, this->stddev);
 
-			this->result->setNodeValue(n, node_layout);
+			std::cout << "Node#" << n << std::endl;
+			std::cout << "Adding " << d0 << " to " << node_layout[0] << std::endl;
+			std::cout << "Adding " << d1 << " to " << node_layout[1] << std::endl;
+			std::cout << "Adding " << d2 << " to " << node_layout[2] << std::endl;
+
+			node_layout[0] = node_layout[0] + d0;
+			node_layout[1] = node_layout[1] + d1;
+			node_layout[2] = node_layout[2] + d2;
+
+			std::cout << "Now " << node_layout[0] << std::endl;
+			std::cout << "Now " << node_layout[1] << std::endl;
+			std::cout << "Now " << node_layout[2] << std::endl;
+
+			this->layout->setNodeValue(n, node_layout);
 		}
 		delete itNodes;
 
